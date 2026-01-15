@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Steuerbare Düngeanlage - Lernfeld 7</title>
+    <title>Gewächshaus-Webapp</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -11,7 +11,7 @@
     <header>
         <div class="header-content">
             <div class="header-left">
-                <h1><i class="fas fa-seedling"></i> Steuerbare Düngeanlage</h1>
+                <h1><i class="fas fa-seedling"></i>Steuerbares Gewächshaus</h1>
                 <p>Lernfeld 7 - Präzisionsdüngung mit Einzelsteuerung</p>
             </div>
             <div class="header-right">
@@ -196,60 +196,6 @@
                     </details>
                 </section>
 
-                <section class="fertilizer-control">
-                    <h2><i class="fas fa-flask"></i> Düngerkontrolle</h2>
-                    <div id="selectedPlantInfo" class="hidden">
-                        <h3>Ausgewählte Hochbeete</h3>
-                        <div class="plant-details">
-                            <p><strong>Beete:</strong> <span id="selectedPlantType"></span></p>
-                            <p><strong>Anzahl:</strong> <span id="selectedPlantPosition"></span></p>
-                            <p><strong>Letzte Auswahl:</strong> <span id="selectedPlantDate"></span></p>
-                        </div>
-                        
-                        <div class="fertilizer-inputs">
-                            <div class="form-group">
-                                <label for="nitrogen">Stickstoff (N) in kg/ha:</label>
-                                <input type="number" id="nitrogen" min="0" max="500" step="0.1" value="0">
-                            </div>
-                            <div class="form-group">
-                                <label for="phosphorus">Phosphor (P) in kg/ha:</label>
-                                <input type="number" id="phosphorus" min="0" max="200" step="0.1" value="0">
-                            </div>
-                            <div class="form-group">
-                                <label for="potassium">Kalium (K) in kg/ha:</label>
-                                <input type="number" id="potassium" min="0" max="300" step="0.1" value="0">
-                            </div>
-                            <button id="applyFertilizer" class="btn btn-success">
-                                <i class="fas fa-spray-can"></i> Dünger anwenden
-                            </button>
-                        </div>
-                    </div>
-                    <div id="noPlantSelected">
-                        <p><i class="fas fa-info-circle"></i> Bitte wählen Sie ein oder mehrere Hochbeete auf der Karte aus (Shift für Mehrfachauswahl).</p>
-                    </div>
-                </section>
-
-                <section class="statistics">
-                    <h2><i class="fas fa-chart-bar"></i> Statistik</h2>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <span class="stat-value" id="totalPlants">0</span>
-                            <span class="stat-label">Pflanzen</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="totalNitrogen">0</span>
-                            <span class="stat-label">N (kg)</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="totalPhosphorus">0</span>
-                            <span class="stat-label">P (kg)</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="totalPotassium">0</span>
-                            <span class="stat-label">K (kg)</span>
-                        </div>
-                    </div>
-                </section>
             </aside>
 
             <section class="map-container">
@@ -455,6 +401,63 @@
                     <div class="plant-search-results hidden" id="plantSearchResults"></div>
                 </div>
             </section>
+
+            <aside class="right-panel">
+                <section class="fertilizer-control">
+                    <h2><i class="fas fa-flask"></i> Düngerkontrolle</h2>
+                    <div id="selectedPlantInfo" class="hidden">
+                        <h3>Ausgewählte Hochbeete</h3>
+                        <div class="plant-details">
+                            <p><strong>Beete:</strong> <span id="selectedPlantType"></span></p>
+                            <p><strong>Anzahl:</strong> <span id="selectedPlantPosition"></span></p>
+                            <p><strong>Letzte Auswahl:</strong> <span id="selectedPlantDate"></span></p>
+                        </div>
+                        
+                        <div class="fertilizer-inputs">
+                            <div class="form-group">
+                                <label for="nitrogen">Stickstoff (N) in kg/ha:</label>
+                                <input type="number" id="nitrogen" min="0" max="500" step="0.1" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="phosphorus">Phosphor (P) in kg/ha:</label>
+                                <input type="number" id="phosphorus" min="0" max="200" step="0.1" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="potassium">Kalium (K) in kg/ha:</label>
+                                <input type="number" id="potassium" min="0" max="300" step="0.1" value="0">
+                            </div>
+                            <button id="applyFertilizer" class="btn btn-success">
+                                <i class="fas fa-spray-can"></i> Dünger anwenden
+                            </button>
+                        </div>
+                    </div>
+                    <div id="noPlantSelected">
+                        <p><i class="fas fa-info-circle"></i> Bitte wählen Sie ein oder mehrere Hochbeete auf der Karte aus (Shift für Mehrfachauswahl).</p>
+                    </div>
+                </section>
+
+                <section class="statistics">
+                    <h2><i class="fas fa-chart-bar"></i> Statistik</h2>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalPlants">0</span>
+                            <span class="stat-label">Pflanzen</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalNitrogen">0</span>
+                            <span class="stat-label">N (kg)</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalPhosphorus">0</span>
+                            <span class="stat-label">P (kg)</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalPotassium">0</span>
+                            <span class="stat-label">K (kg)</span>
+                        </div>
+                    </div>
+                </section>
+            </aside>
 
         </div>
         

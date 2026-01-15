@@ -80,6 +80,7 @@ class FertilizerControlSystem {
             enabled: false,
             websocketUrl: 'ws://localhost:1880/ws',
             websocket: null,
+            reconnectInterval: 5000, // 5 Sekunden Reconnect-Intervall
             topics: {
                 temperature: 'sensors/temperature',
                 humidity: 'sensors/humidity',
@@ -95,6 +96,7 @@ class FertilizerControlSystem {
             capacity: 1000,
             currentLevel: 750,
             temperature: 18.5,
+            warningLevel: 20, // Warnung bei unter 20%
             lastUpdate: new Date()
         };
         
@@ -152,7 +154,28 @@ class FertilizerControlSystem {
             'kohl': '🥬'
         };
         
+        // Performance: Debounced save
+        this._saveDebounceTimer = null;
+        this._debouncedSave = this.debounce(() => this._saveToLocalStorageImmediate(), 500);
+        
         this.init();
+    }
+    
+    // Utility: Debounce-Funktion für Performance
+    debounce(func, wait) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+    
+    // XSS-Schutz: HTML-Escape-Funktion
+    escapeHtml(text) {
+        if (typeof text !== 'string') return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
     
     init() {
@@ -1678,10 +1701,15 @@ class FertilizerControlSystem {
             this.plantIdCounter = 1;
             this.todoIdCounter = 1;
             
-            // UI zurücksetzen
-            document.getElementById('selectedPlantInfo').classList.add('hidden');
-            document.getElementById('noPlantSelected').classList.remove('hidden');
-            document.getElementById('zoneProperties').classList.add('hidden');
+            // UI zurücksetzen - mit Null-Check
+            const selectedPlantInfo = document.getElementById('selectedPlantInfo');
+            const noPlantSelected = document.getElementById('noPlantSelected');
+            
+            if (selectedPlantInfo) selectedPlantInfo.classList.add('hidden');
+            if (noPlantSelected) noPlantSelected.classList.remove('hidden');
+            
+            // Inline-Panel zurücksetzen
+            this.updateInlineBedInfo();
             
             // Standardkarte neu erstellen
             this.createDefaultMap();
@@ -1763,9 +1791,21 @@ class FertilizerControlSystem {
         // Neue ViewBox basierend auf Zoom berechnen
         const baseSize = 100;
         const viewSize = baseSize / this.zoom;
-        const offset = (baseSize - viewSize) / 2;
         
-        svg.setAttribute('viewBox', `${offset + this.panX} ${offset + this.panY} ${viewSize} ${viewSize}`);
+        // Beim Rauszoomen: ViewBox bleibt bei 0,0 und wird nur größer
+        // Beim Reinzoomen: ViewBox wird zentriert
+        let offsetX, offsetY;
+        if (this.zoom >= 1) {
+            // Reinzoomen: Zentriert
+            offsetX = (baseSize - viewSize) / 2;
+            offsetY = (baseSize - viewSize) / 2;
+        } else {
+            // Rauszoomen: Bleibt bei 0,0 um Gras-Textur zu erhalten
+            offsetX = 0;
+            offsetY = 0;
+        }
+        
+        svg.setAttribute('viewBox', `${offsetX + this.panX} ${offsetY + this.panY} ${viewSize} ${viewSize}`);
     }
     
     // Graphen-Funktionen
@@ -2170,19 +2210,21 @@ class FertilizerControlSystem {
             const response = await fetch(`${this.serverConfig.url}/api/data`);
             if (response.ok) {
                 const data = await response.json();
-                this.log('INFO', 'Daten vom Server synchronisiert', { zones: data.zones?.length, slots: data.slots?.length, plants: data.plants?.length });
+                this.log('INFO', 'Daten vom Server synchronisiert', { 
+                    zones: data.zones?.length || 0, 
+                    plants: data.plants?.length || 0 
+                });
                 
-                // Daten aktualisieren
-                if (data.zones) this.zones = data.zones;
-                if (data.slots) this.slots = data.slots;
-                if (data.plants) this.plants = data.plants;
+                // Server verwendet altes Modell - konvertieren zu Hochbeet-Modell falls nötig
+                // Aktuell wird Server-Sync nur für Logging verwendet
+                // Hochbeet-Daten bleiben in LocalStorage
                 
                 this.render();
                 this.updateStatistics();
-                this.updateSlotSelector();
+                this.updateBedSelector();
             }
         } catch (error) {
-            this.log('ERROR', 'Fehler bei Server-Synchronisation', error);
+            this.log('ERROR', 'Fehler bei Server-Synchronisation', { message: error.message });
         }
     }
     
@@ -2190,25 +2232,58 @@ class FertilizerControlSystem {
         if (!this.serverConfig.enabled) return;
         
         try {
+            // Konvertiere Hochbeet-Modell zu Server-Format (zones/slots/plants)
+            const zones = this.beds.map(bed => ({
+                id: bed.id,
+                name: bed.name,
+                x: bed.x,
+                y: bed.y,
+                width: bed.width,
+                height: bed.height,
+                rows: 1,
+                cols: bed.plants.length || 1,
+                color: bed.color
+            }));
+            
+            // Pflanzen aus Beeten extrahieren
+            const plants = [];
+            this.beds.forEach(bed => {
+                bed.plants.forEach(plant => {
+                    plants.push({
+                        id: plant.id,
+                        name: plant.name,
+                        customName: plant.name,
+                        slotId: bed.id * 1000 + plant.id, // Pseudo-Slot-ID
+                        fertilizer: bed.fertilizer || { nitrogen: 0, phosphorus: 0, potassium: 0 },
+                        notes: [],
+                        harvestEvents: []
+                    });
+                });
+            });
+            
             const response = await fetch(`${this.serverConfig.url}/api/data`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    zones: this.zones,
-                    slots: this.slots,
-                    plants: this.plants
+                    zones: zones,
+                    slots: [], // Nicht verwendet im Hochbeet-Modell
+                    plants: plants
                 })
             });
             
             if (response.ok) {
-                this.log('INFO', 'Daten erfolgreich auf Server gespeichert', { zones: this.zones.length, slots: this.slots.length, plants: this.plants.length });
+                this.log('INFO', 'Daten erfolgreich auf Server gespeichert', { 
+                    beds: this.beds.length, 
+                    plants: plants.length 
+                });
             } else {
-                this.log('ERROR', 'Fehler beim Speichern auf Server', await response.text());
+                const errorText = await response.text();
+                this.log('ERROR', 'Fehler beim Speichern auf Server', { status: response.status });
             }
         } catch (error) {
-            this.log('ERROR', 'Netzwerkfehler beim Speichern auf Server', error);
+            this.log('ERROR', 'Netzwerkfehler beim Speichern auf Server', { message: error.message });
         }
     }
     
@@ -2298,7 +2373,17 @@ class FertilizerControlSystem {
         }, 3000);
     }
     
+    // Debounced version - wird für häufige Aufrufe verwendet
     saveToLocalStorage() {
+        if (this._debouncedSave) {
+            this._debouncedSave();
+        } else {
+            this._saveToLocalStorageImmediate();
+        }
+    }
+    
+    // Sofortige Speicherung - für kritische Aktionen
+    _saveToLocalStorageImmediate() {
         try {
             // Neue Hochbeet-Daten speichern
             localStorage.setItem('fertilizerBeds', JSON.stringify(this.beds));
@@ -2311,24 +2396,30 @@ class FertilizerControlSystem {
             localStorage.setItem('nodeRed', JSON.stringify(this.nodeRed));
             localStorage.setItem('serverConfig', JSON.stringify(this.serverConfig));
             
-            // Alte Daten entfernen (Hard Reset)
-            localStorage.removeItem('fertilizerPlants');
-            localStorage.removeItem('fertilizerSlots');
-            localStorage.removeItem('fertilizerZones');
-            localStorage.removeItem('fertilizerSlotIdCounter');
-            localStorage.removeItem('fertilizerZoneIdCounter');
+            // Alte Daten entfernen (Hard Reset) - nur einmal beim Start
+            if (!this._oldDataCleaned) {
+                localStorage.removeItem('fertilizerPlants');
+                localStorage.removeItem('fertilizerSlots');
+                localStorage.removeItem('fertilizerZones');
+                localStorage.removeItem('fertilizerSlotIdCounter');
+                localStorage.removeItem('fertilizerZoneIdCounter');
+                this._oldDataCleaned = true;
+            }
             
-            const totalPlants = this.beds.reduce((sum, bed) => sum + bed.plants.length, 0);
-            this.log('INFO', 'Daten in LocalStorage gespeichert', { 
-                beds: this.beds.length, 
-                plants: totalPlants
-            });
+            // Reduziertes Logging - nur bei DEBUG Level
+            if (this.logLevel === 'DEBUG') {
+                const totalPlants = this.beds.reduce((sum, bed) => sum + bed.plants.length, 0);
+                this.log('DEBUG', 'Daten in LocalStorage gespeichert', { 
+                    beds: this.beds.length, 
+                    plants: totalPlants
+                });
+            }
             
-            // Auch auf Server speichern, wenn aktiv
+            // Auch auf Server speichern, wenn aktiv (ebenfalls debounced)
             this.saveToServer();
             
         } catch (error) {
-            this.log('ERROR', 'Fehler beim Speichern der Daten', error);
+            this.log('ERROR', 'Fehler beim Speichern der Daten', { message: error.message });
             this.showToast('Fehler beim Speichern der Daten', 'error');
         }
     }
@@ -3067,12 +3158,6 @@ class FertilizerControlSystem {
         });
     }
     
-    // Legacy-Methoden für Kompatibilität (werden nicht mehr benötigt)
-    getPlantDisplayName(plant) {
-        if (!plant) return 'Unbekannt';
-        return plant.name || 'Unbekannt';
-    }
-    
     switchTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tabName);
@@ -3081,19 +3166,6 @@ class FertilizerControlSystem {
             content.classList.toggle('active', content.id === `inline-${tabName}-tab`);
         });
     }
-    
-    // Legacy-Methoden (nicht mehr verwendet im Hochbeet-Modell)
-    addInlineHarvestEvent() { /* Legacy */ }
-    renderInlineHarvestEvents() { /* Legacy */ }
-    completeInlineHarvestEvent(eventId) { /* Legacy */ }
-    deleteInlineHarvestEvent(eventId) { /* Legacy */ }
-    loadPlantData() { /* Legacy */ }
-    saveNotes() { /* Legacy */ }
-    renderNotes() { /* Legacy */ }
-    addHarvestEvent() { /* Legacy */ }
-    renderHarvestEvents() { /* Legacy */ }
-    completeHarvestEvent(eventId) { /* Legacy */ }
-    deleteHarvestEvent(eventId) { /* Legacy */ }
 }
 
 // Initialisierung beim Laden der Seite
