@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Search, Plus, Clock, Users, ChefHat, X, Edit2, Trash2, ArrowLeft, 
   FileDown, Sun, Moon, Wine, Sparkles, GlassWater,
-  UtensilsCrossed, ListOrdered, Leaf
+  UtensilsCrossed, ListOrdered, Leaf, Link2
 } from 'lucide-react';
 import './styles.css';
 import { UniversalRecipeForm } from './RecipeForms';
+import RecipeImport from './RecipeImport';
 
 const API_URL = '';
 const DRINK_CATEGORIES = ['Cocktails', 'Mocktails'];
@@ -207,6 +208,15 @@ function App() {
     setIsFormOpen(true);
   };
 
+  // Import modal state
+  const [showImportModal, setShowImportModal] = useState(false);
+
+  const handleImportRecipe = () => {
+    // Recipe was auto-saved, just refresh the list
+    fetchRecipes();
+    fetchCategories();
+  };
+
   const closeForm = () => {
     setIsFormOpen(false);
     setEditingRecipe(null);
@@ -272,6 +282,14 @@ function App() {
           </div>
           <div className="header-actions">
             <DarkModeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
+            <button 
+              className="btn btn-secondary" 
+              onClick={() => setShowImportModal(true)}
+              title="Rezept von URL importieren"
+            >
+              <Link2 style={{ width: 18, height: 18 }} />
+              <span>Import</span>
+            </button>
             <button className="btn btn-primary" onClick={() => handleNewRecipe()}>
               <Plus style={{ width: 18, height: 18 }} />
               <span>Add Recipe</span>
@@ -333,6 +351,16 @@ function App() {
           </div>
         )}
       </main>
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <RecipeImport
+          onImport={handleImportRecipe}
+          onClose={() => setShowImportModal(false)}
+          darkMode={darkMode}
+          categories={categories}
+        />
+      )}
     </div>
   );
 }
@@ -439,10 +467,104 @@ function RecipeCard({ recipe, onClick }) {
 function RecipeDetail({ recipe, onBack, onEdit, onDelete, darkMode, setDarkMode }) {
   const [activeTab, setActiveTab] = useState('recipe');
   
+  // Serving calculator state
+  const originalServings = parseInt(recipe.servings) || 4;
+  const [desiredServings, setDesiredServings] = useState(originalServings);
+  const scaleFactor = desiredServings / originalServings;
+
+  // Function to scale ingredient quantities
+  const scaleIngredient = (ingredient) => {
+    if (scaleFactor === 1) return ingredient;
+    
+    // Match patterns like "200g", "2 EL", "1/2 TL", "3-4 Stück", "100 ml", "1,5 kg"
+    const patterns = [
+      // "200g" or "200 g" - number followed by unit
+      /^(\d+(?:[.,]\d+)?)\s*(g|kg|ml|l|cl|oz|EL|TL|Prise|Stück|Scheiben?|Zehen?|Bund|Dose[n]?|Becher|Tasse[n]?|Cup|Handvoll|Pck\.|Pkg\.?|Packung(?:en)?)\b/i,
+      // "2 große" - number followed by adjective
+      /^(\d+(?:[.,]\d+)?)\s+(große[rns]?|kleine[rns]?|mittlere[rns]?|halbe[rns]?)\s+/i,
+      // Just a number at start "2 Eier", "3 Tomaten"
+      /^(\d+(?:[.,]\d+)?)\s+/,
+      // Fraction like "1/2" or "1/4"
+      /^(\d+)\/(\d+)\s*/,
+      // Range like "3-4"
+      /^(\d+)-(\d+)\s*/,
+    ];
+
+    let result = ingredient;
+    
+    // Try fraction pattern first
+    const fractionMatch = ingredient.match(/^(\d+)\/(\d+)\s*(.*)/);
+    if (fractionMatch) {
+      const num = parseInt(fractionMatch[1]);
+      const denom = parseInt(fractionMatch[2]);
+      const rest = fractionMatch[3];
+      const scaled = (num / denom) * scaleFactor;
+      
+      // Format nicely
+      if (scaled === Math.floor(scaled)) {
+        result = `${Math.floor(scaled)} ${rest}`;
+      } else if (scaled < 1) {
+        // Try to express as fraction
+        const commonFractions = [[1,4,'1/4'],[1,3,'1/3'],[1,2,'1/2'],[2,3,'2/3'],[3,4,'3/4']];
+        let foundFrac = false;
+        for (const [n, d, str] of commonFractions) {
+          if (Math.abs(scaled - n/d) < 0.05) {
+            result = `${str} ${rest}`;
+            foundFrac = true;
+            break;
+          }
+        }
+        if (!foundFrac) result = `${scaled.toFixed(2).replace('.', ',')} ${rest}`;
+      } else {
+        result = `${scaled.toFixed(1).replace('.', ',').replace(',0', '')} ${rest}`;
+      }
+      return result;
+    }
+
+    // Try range pattern "3-4"
+    const rangeMatch = ingredient.match(/^(\d+)-(\d+)\s*(.*)/);
+    if (rangeMatch) {
+      const low = Math.round(parseInt(rangeMatch[1]) * scaleFactor);
+      const high = Math.round(parseInt(rangeMatch[2]) * scaleFactor);
+      return `${low}-${high} ${rangeMatch[3]}`;
+    }
+
+    // Try number with unit or just number
+    const numberMatch = ingredient.match(/^(\d+(?:[.,]\d+)?)\s*(.*)/);
+    if (numberMatch) {
+      const num = parseFloat(numberMatch[1].replace(',', '.'));
+      const rest = numberMatch[2];
+      const scaled = num * scaleFactor;
+      
+      // Format the number nicely
+      let formattedNum;
+      if (scaled === Math.floor(scaled)) {
+        formattedNum = Math.floor(scaled).toString();
+      } else if (scaled < 10) {
+        formattedNum = scaled.toFixed(1).replace('.', ',').replace(',0', '');
+      } else {
+        formattedNum = Math.round(scaled).toString();
+      }
+      
+      return `${formattedNum} ${rest}`;
+    }
+
+    return ingredient;
+  };
+
   const ingredients = recipe.ingredients ? recipe.ingredients.split('\n').filter(i => i.trim()) : [];
+  const scaledIngredients = ingredients.map(scaleIngredient);
   const instructions = recipe.instructions ? recipe.instructions.split('\n').filter(i => i.trim()) : [];
   const spices = recipe.spices ? recipe.spices.split('\n').filter(i => i.trim()) : [];
   const beverages = recipe.beverages ? recipe.beverages.split('\n').filter(i => i.trim()) : [];
+  
+  // Parse custom sections
+  let customSections = [];
+  try {
+    customSections = recipe.custom_sections ? JSON.parse(recipe.custom_sections) : [];
+  } catch (e) {
+    customSections = [];
+  }
 
   const hasExtras = spices.length > 0 || beverages.length > 0;
 
@@ -556,11 +678,86 @@ function RecipeDetail({ recipe, onBack, onEdit, onDelete, darkMode, setDarkMode 
               </div>
             )}
             {recipe.servings && (
-              <div className="meta-item">
+              <div className="meta-item" style={{ minWidth: '180px' }}>
                 <Users className="icon" style={{ width: 20, height: 20 }} />
-                <div>
-                  <div className="label">Servings</div>
-                  <div className="value">{recipe.servings}</div>
+                <div style={{ flex: 1 }}>
+                  <div className="label">Portionen</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                    <button
+                      onClick={() => setDesiredServings(Math.max(1, desiredServings - 1))}
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        backgroundColor: 'var(--color-primary-500)',
+                        color: 'white',
+                        fontSize: '18px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      −
+                    </button>
+                    <span style={{ 
+                      fontSize: '1.25rem', 
+                      fontWeight: '700',
+                      minWidth: '40px',
+                      textAlign: 'center',
+                      color: scaleFactor !== 1 ? 'var(--color-primary-500)' : 'inherit'
+                    }}>
+                      {desiredServings}
+                    </span>
+                    <button
+                      onClick={() => setDesiredServings(desiredServings + 1)}
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        backgroundColor: 'var(--color-primary-500)',
+                        color: 'white',
+                        fontSize: '18px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      +
+                    </button>
+                    {scaleFactor !== 1 && (
+                      <button
+                        onClick={() => setDesiredServings(originalServings)}
+                        style={{
+                          marginLeft: '4px',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          border: 'none',
+                          backgroundColor: 'var(--color-text-muted)',
+                          color: 'white',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                        }}
+                        title="Zurücksetzen"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                  {scaleFactor !== 1 && (
+                    <div style={{ 
+                      fontSize: '11px', 
+                      color: 'var(--color-primary-500)',
+                      marginTop: '4px'
+                    }}>
+                      Original: {originalServings} · Faktor: {scaleFactor.toFixed(2).replace('.00', '')}x
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -573,18 +770,59 @@ function RecipeDetail({ recipe, onBack, onEdit, onDelete, darkMode, setDarkMode 
         {/* Tab Content */}
         {activeTab === 'recipe' && (
           <div className="section-card animate-fade-in">
-            <div className="section-title">
-              <UtensilsCrossed style={{ width: 20, height: 20, color: 'var(--color-primary-500)' }} />
-              Ingredients
+            <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <UtensilsCrossed style={{ width: 20, height: 20, color: 'var(--color-primary-500)' }} />
+                Zutaten
+              </div>
+              {scaleFactor !== 1 && (
+                <span style={{ 
+                  fontSize: '12px', 
+                  padding: '4px 10px',
+                  borderRadius: '12px',
+                  backgroundColor: 'var(--color-primary-100)',
+                  color: 'var(--color-primary-600)',
+                  fontWeight: '600'
+                }}>
+                  {scaleFactor > 1 ? '↑' : '↓'} {scaleFactor.toFixed(1).replace('.0', '')}x angepasst
+                </span>
+              )}
             </div>
             <ul className="ingredient-list">
-              {ingredients.map((ingredient, index) => (
+              {scaledIngredients.map((ingredient, index) => (
                 <li key={index}>
                   <span className="bullet"></span>
                   <span>{ingredient}</span>
                 </li>
               ))}
             </ul>
+
+            {/* Custom Sections */}
+            {customSections.length > 0 && customSections.map((section, sectionIndex) => {
+              const sectionIngredients = section.ingredients ? section.ingredients.split('\n').filter(i => i.trim()) : [];
+              const scaledSectionIngredients = sectionIngredients.map(scaleIngredient);
+              
+              return (
+                <div key={sectionIndex} style={{ marginTop: 'var(--space-6)' }}>
+                  <div className="section-title" style={{ 
+                    color: 'var(--color-amber-500)',
+                    borderBottom: '2px solid var(--color-amber-200)',
+                    paddingBottom: 'var(--space-2)',
+                    marginBottom: 'var(--space-3)'
+                  }}>
+                    📦 {section.name}
+                  </div>
+                  <ul className="ingredient-list">
+                    {scaledSectionIngredients.map((ingredient, index) => (
+                      <li key={index}>
+                        <span className="bullet" style={{ backgroundColor: 'var(--color-amber-500)' }}></span>
+                        <span>{ingredient}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
         )}
 

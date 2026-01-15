@@ -56,6 +56,14 @@ db.serialize(() => {
       // Column already exists, ignore
     }
   });
+  
+  // Migration: Add custom_sections column for extra ingredient groups (JSON format)
+  // Format: [{ "name": "Für die Soße", "ingredients": "..." }, ...]
+  db.run(`ALTER TABLE recipes ADD COLUMN custom_sections TEXT`, (err) => {
+    if (err && !err.message.includes('duplicate column')) {
+      // Column already exists, ignore
+    }
+  });
 });
 
 module.exports = db;

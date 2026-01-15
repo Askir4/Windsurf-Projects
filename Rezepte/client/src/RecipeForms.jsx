@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, Wine, Sparkles, GlassWater, ChefHat, Flame, Salad, Cake, Soup, Pizza } from 'lucide-react';
+import { X, Upload, Wine, Sparkles, GlassWater, ChefHat, Flame, Salad, Cake, Soup, Pizza, Plus, Trash2 } from 'lucide-react';
 import { IngredientSelector, IngredientList } from './IngredientSelector';
 import { UNITS } from './ingredientsDatabase';
 
@@ -157,10 +157,34 @@ function UniversalRecipeForm({ recipe, category, categories, onClose, onSave, da
   const [ingredientsList, setIngredientsList] = useState([]);
   const [spicesList, setSpicesList] = useState([]);
   const [beveragesList, setBeveragesList] = useState([]);
+  const [customSections, setCustomSections] = useState(
+    recipe?.custom_sections ? JSON.parse(recipe.custom_sections) : []
+  );
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(recipe?.image_url || null);
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState('basic');
+
+  // Custom section handlers
+  const addCustomSection = () => {
+    setCustomSections([...customSections, { name: 'Neue Sektion', ingredients: '' }]);
+  };
+
+  const updateCustomSectionName = (index, name) => {
+    const updated = [...customSections];
+    updated[index].name = name;
+    setCustomSections(updated);
+  };
+
+  const updateCustomSectionIngredients = (index, ingredients) => {
+    const updated = [...customSections];
+    updated[index].ingredients = ingredients;
+    setCustomSections(updated);
+  };
+
+  const removeCustomSection = (index) => {
+    setCustomSections(customSections.filter((_, i) => i !== index));
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -215,6 +239,11 @@ function UniversalRecipeForm({ recipe, category, categories, onClose, onSave, da
           data.append(key, formData[key]);
         }
       });
+      
+      // Add custom sections
+      if (customSections.length > 0) {
+        data.append('custom_sections', JSON.stringify(customSections));
+      }
       
       if (imageFile) {
         data.append('image', imageFile);
@@ -463,6 +492,7 @@ function UniversalRecipeForm({ recipe, category, categories, onClose, onSave, da
                 <IngredientSelector 
                   onAddIngredient={handleAddIngredient}
                   darkMode={darkMode}
+                  sectionType="ingredients"
                 />
                 
                 <div style={{ marginTop: 'var(--space-6)' }}>
@@ -501,6 +531,99 @@ function UniversalRecipeForm({ recipe, category, categories, onClose, onSave, da
                     />
                   </details>
                 </div>
+
+                {/* Custom Ingredient Sections */}
+                <div style={{ marginTop: 'var(--space-6)' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    marginBottom: 'var(--space-4)'
+                  }}>
+                    <h4 style={{ 
+                      fontSize: 'var(--font-size-base)', 
+                      fontWeight: 'var(--font-weight-semibold)',
+                      color: 'var(--color-text-secondary)'
+                    }}>
+                      📦 Extra Zutaten-Sektionen
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={addCustomSection}
+                      className="btn btn-secondary"
+                      style={{ padding: 'var(--space-2) var(--space-3)' }}
+                    >
+                      <Plus style={{ width: 16, height: 16 }} />
+                      <span>Sektion hinzufügen</span>
+                    </button>
+                  </div>
+                  
+                  <p style={{ 
+                    fontSize: 'var(--font-size-sm)', 
+                    color: 'var(--color-text-muted)',
+                    marginBottom: 'var(--space-4)'
+                  }}>
+                    Füge zusätzliche Zutaten-Gruppen hinzu, z.B. "Für die Soße", "Für die Beilage", etc.
+                  </p>
+
+                  {customSections.map((section, index) => (
+                    <div 
+                      key={index}
+                      style={{
+                        padding: 'var(--space-4)',
+                        marginBottom: 'var(--space-3)',
+                        borderRadius: 'var(--radius-lg)',
+                        border: '2px dashed var(--color-border)',
+                        backgroundColor: 'var(--color-bg-tertiary)'
+                      }}
+                    >
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 'var(--space-3)',
+                        marginBottom: 'var(--space-3)'
+                      }}>
+                        <input
+                          type="text"
+                          value={section.name}
+                          onChange={(e) => updateCustomSectionName(index, e.target.value)}
+                          className="input"
+                          placeholder="Name der Sektion (z.B. Für die Soße)"
+                          style={{ flex: 1 }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeCustomSection(index)}
+                          className="btn btn-icon btn-ghost"
+                          style={{ color: 'var(--color-pink-500)' }}
+                          title="Sektion entfernen"
+                        >
+                          <Trash2 style={{ width: 18, height: 18 }} />
+                        </button>
+                      </div>
+                      <textarea
+                        value={section.ingredients}
+                        onChange={(e) => updateCustomSectionIngredients(index, e.target.value)}
+                        className="input"
+                        rows="4"
+                        placeholder="Zutaten (eine pro Zeile)&#10;z.B.:&#10;200g Sahne&#10;2 EL Butter&#10;1 Zwiebel"
+                      />
+                    </div>
+                  ))}
+
+                  {customSections.length === 0 && (
+                    <div style={{
+                      padding: 'var(--space-4)',
+                      textAlign: 'center',
+                      color: 'var(--color-text-muted)',
+                      fontSize: 'var(--font-size-sm)',
+                      border: '1px dashed var(--color-border)',
+                      borderRadius: 'var(--radius-lg)'
+                    }}>
+                      Keine extra Sektionen. Klicke "Sektion hinzufügen" um z.B. Soßen oder Beilagen separat aufzulisten.
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -529,6 +652,7 @@ function UniversalRecipeForm({ recipe, category, categories, onClose, onSave, da
                   <IngredientSelector 
                     onAddIngredient={handleAddSpice}
                     darkMode={darkMode}
+                    sectionType="spices"
                   />
                   
                   <div style={{ marginTop: 'var(--space-4)' }}>
@@ -586,6 +710,7 @@ function UniversalRecipeForm({ recipe, category, categories, onClose, onSave, da
                   <IngredientSelector 
                     onAddIngredient={handleAddBeverage}
                     darkMode={darkMode}
+                    sectionType="beverages"
                   />
                   
                   <div style={{ marginTop: 'var(--space-4)' }}>

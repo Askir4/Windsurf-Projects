@@ -1,12 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Plus, X, ChevronDown } from 'lucide-react';
-import { searchIngredients, getAllIngredients, UNITS } from './ingredientsDatabase';
+import { searchIngredients, getAllIngredients, UNITS, INGREDIENTS_DATABASE } from './ingredientsDatabase';
 
 // ===================================
 // INGREDIENT SELECTOR COMPONENT
 // ===================================
 
-function IngredientSelector({ onAddIngredient, darkMode }) {
+// Map section types to ingredient database categories
+const SECTION_TO_CATEGORIES = {
+  'ingredients': ['proteins', 'vegetables', 'dairy', 'grains'],
+  'spices': ['spices'],
+  'beverages': ['liquids'],
+  'default': ['proteins', 'vegetables', 'fruits', 'dairy']
+};
+
+function IngredientSelector({ onAddIngredient, darkMode, sectionType = 'default' }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState(null);
@@ -18,7 +26,20 @@ function IngredientSelector({ onAddIngredient, darkMode }) {
   const resultsRef = useRef(null);
 
   const searchResults = searchQuery ? searchIngredients(searchQuery) : [];
-  const allIngredients = getAllIngredients();
+  
+  // Get popular ingredients based on section type
+  const getPopularIngredients = () => {
+    const categories = SECTION_TO_CATEGORIES[sectionType] || SECTION_TO_CATEGORIES['default'];
+    const popular = [];
+    for (const cat of categories) {
+      if (INGREDIENTS_DATABASE[cat]) {
+        popular.push(...INGREDIENTS_DATABASE[cat].slice(0, 4));
+      }
+    }
+    return popular.slice(0, 12);
+  };
+  
+  const popularIngredients = getPopularIngredients();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -71,12 +92,14 @@ function IngredientSelector({ onAddIngredient, darkMode }) {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 'var(--space-3)',
-        padding: 'var(--space-3)',
+        gap: 'var(--space-2)',
+        padding: 'var(--space-2) var(--space-3)',
         cursor: 'pointer',
         borderRadius: 'var(--radius-lg)',
         transition: 'background-color var(--transition-fast)',
-        backgroundColor: darkMode ? 'var(--color-bg-tertiary)' : 'transparent'
+        backgroundColor: darkMode ? 'var(--color-bg-tertiary)' : 'transparent',
+        overflow: 'hidden',
+        minWidth: 0
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.backgroundColor = darkMode ? 'var(--color-bg-secondary)' : 'var(--color-bg-tertiary)';
@@ -85,18 +108,25 @@ function IngredientSelector({ onAddIngredient, darkMode }) {
         e.currentTarget.style.backgroundColor = darkMode ? 'var(--color-bg-tertiary)' : 'transparent';
       }}
     >
-      <span style={{ fontSize: '1.5rem' }}>{ingredient.icon}</span>
-      <div style={{ flex: 1 }}>
+      <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>{ingredient.icon}</span>
+      <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
         <div style={{ 
           fontWeight: 'var(--font-weight-medium)', 
-          color: 'var(--color-text-primary)' 
+          color: 'var(--color-text-primary)',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          fontSize: 'var(--font-size-sm)'
         }}>
           {ingredient.name}
         </div>
         <div style={{ 
           fontSize: 'var(--font-size-xs)', 
           color: 'var(--color-text-muted)',
-          textTransform: 'capitalize'
+          textTransform: 'capitalize',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis'
         }}>
           {ingredient.category}
         </div>
@@ -372,10 +402,10 @@ function IngredientSelector({ onAddIngredient, darkMode }) {
             </h4>
             <div style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', 
               gap: 'var(--space-2)' 
             }}>
-              {allIngredients.slice(0, 12).map(renderIngredientItem)}
+              {popularIngredients.map(renderIngredientItem)}
             </div>
           </div>
         )}
