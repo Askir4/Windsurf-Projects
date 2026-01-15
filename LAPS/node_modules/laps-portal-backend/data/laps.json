@@ -1,0 +1,295 @@
+{
+  "requests": [
+    [
+      "db9a5d2d-4305-42b2-be85-b9705b47a3b3",
+      {
+        "id": "db9a5d2d-4305-42b2-be85-b9705b47a3b3",
+        "requesterId": "public:aaron.schunter",
+        "requesterName": "Aaron Schunter",
+        "hostname": "PMCS-AASC",
+        "justification": "TestTESTTestTESTTestTEST",
+        "justificationHash": "d4755c89b58c5059",
+        "status": "denied",
+        "createdAt": "2026-01-15T19:31:22.911Z",
+        "expiresAt": "2026-01-16T19:31:22.911Z",
+        "reviewedBy": "admin",
+        "reviewedAt": "2026-01-15T20:14:57.895Z",
+        "reviewerComment": null,
+        "passwordRetrievedAt": null,
+        "passwordDisplayedAt": null,
+        "passwordDisplayExpiresAt": null,
+        "clientIp": "::1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "computerFound": false,
+        "lapsAvailable": false,
+        "updatedAt": "2026-01-15T20:14:57.895Z"
+      }
+    ],
+    [
+      "69b541df-b76c-4871-8e26-80b9a10f54f9",
+      {
+        "id": "69b541df-b76c-4871-8e26-80b9a10f54f9",
+        "requesterId": "public:tim.die.alte.sau",
+        "requesterName": "Tim die alte Sau",
+        "hostname": "AASC-TEST",
+        "justification": "Ich brauche Admin um Pornos zu schauen ",
+        "justificationHash": "4610615a959e2667",
+        "status": "denied",
+        "createdAt": "2026-01-15T19:32:51.233Z",
+        "expiresAt": "2026-01-16T19:32:51.233Z",
+        "reviewedBy": "admin",
+        "reviewedAt": "2026-01-15T19:36:15.205Z",
+        "reviewerComment": null,
+        "passwordRetrievedAt": null,
+        "passwordDisplayedAt": null,
+        "passwordDisplayExpiresAt": null,
+        "clientIp": "::1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "computerFound": false,
+        "lapsAvailable": false,
+        "updatedAt": "2026-01-15T19:36:15.205Z"
+      }
+    ]
+  ],
+  "auditLogs": [
+    [
+      "ee76e68e-7d9d-49e7-a40a-3cb7b2a25061",
+      {
+        "eventType": "LOGIN_FAILED",
+        "userId": "user",
+        "userName": "user",
+        "hostname": null,
+        "requestId": null,
+        "details": "{\"action\":\"Login attempt failed\",\"reason\":\"Invalid credentials\"}",
+        "clientIp": "::1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": false,
+        "errorMessage": "Invalid credentials",
+        "id": "ee76e68e-7d9d-49e7-a40a-3cb7b2a25061",
+        "timestamp": "2026-01-15T19:21:40.503Z"
+      }
+    ],
+    [
+      "3aefcfb1-9b40-4e9b-8cb2-72e9ece6df91",
+      {
+        "eventType": "LOGIN_FAILED",
+        "userId": "user",
+        "userName": "user",
+        "hostname": null,
+        "requestId": null,
+        "details": "{\"action\":\"Login attempt failed\",\"reason\":\"Invalid credentials\"}",
+        "clientIp": "::1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": false,
+        "errorMessage": "Invalid credentials",
+        "id": "3aefcfb1-9b40-4e9b-8cb2-72e9ece6df91",
+        "timestamp": "2026-01-15T19:21:49.722Z"
+      }
+    ],
+    [
+      "6f8fc385-658e-48a5-b697-4e6df196133c",
+      {
+        "eventType": "LOGIN_FAILED",
+        "userId": "admin",
+        "userName": "admin",
+        "hostname": null,
+        "requestId": null,
+        "details": "{\"action\":\"Login attempt failed\",\"reason\":\"Invalid credentials\"}",
+        "clientIp": "::1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": false,
+        "errorMessage": "Invalid credentials",
+        "id": "6f8fc385-658e-48a5-b697-4e6df196133c",
+        "timestamp": "2026-01-15T19:22:07.243Z"
+      }
+    ],
+    [
+      "67c6c93d-2aa3-4331-b56f-088e14302795",
+      {
+        "eventType": "LOGIN_FAILED",
+        "userId": "admin",
+        "userName": "admin",
+        "hostname": null,
+        "requestId": null,
+        "details": "{\"action\":\"Login attempt failed\",\"reason\":\"Invalid credentials\"}",
+        "clientIp": "127.0.0.1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": false,
+        "errorMessage": "Invalid credentials",
+        "id": "67c6c93d-2aa3-4331-b56f-088e14302795",
+        "timestamp": "2026-01-15T19:28:23.659Z"
+      }
+    ],
+    [
+      "58f645eb-9314-4117-b7eb-33e3c3984bb5",
+      {
+        "eventType": "LOGIN_SUCCESS",
+        "userId": "admin",
+        "userName": "Admin User",
+        "hostname": null,
+        "requestId": null,
+        "details": "{\"action\":\"User logged in successfully\"}",
+        "clientIp": "127.0.0.1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": true,
+        "errorMessage": null,
+        "id": "58f645eb-9314-4117-b7eb-33e3c3984bb5",
+        "timestamp": "2026-01-15T19:30:41.072Z"
+      }
+    ],
+    [
+      "4028f5dd-83cf-44f8-9492-6c0a00e65f0a",
+      {
+        "eventType": "REQUEST_CREATED",
+        "userId": "anonymous",
+        "userName": "Aaron Schunter",
+        "hostname": "PMCS-AASC",
+        "requestId": "db9a5d2d-4305-42b2-be85-b9705b47a3b3",
+        "details": "{\"action\":\"Password request created\",\"justificationHash\":\"d4755c89b58c5059\"}",
+        "clientIp": "::1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": true,
+        "errorMessage": null,
+        "id": "4028f5dd-83cf-44f8-9492-6c0a00e65f0a",
+        "timestamp": "2026-01-15T19:31:22.914Z"
+      }
+    ],
+    [
+      "5eef9f23-a695-4c0c-a094-6ac5c4e3c398",
+      {
+        "eventType": "LOGIN_SUCCESS",
+        "userId": "admin",
+        "userName": "Admin User",
+        "hostname": null,
+        "requestId": null,
+        "details": "{\"action\":\"User logged in successfully\"}",
+        "clientIp": "127.0.0.1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": true,
+        "errorMessage": null,
+        "id": "5eef9f23-a695-4c0c-a094-6ac5c4e3c398",
+        "timestamp": "2026-01-15T19:31:34.918Z"
+      }
+    ],
+    [
+      "e4b7c111-b2e8-4367-81fa-208d4eaa840a",
+      {
+        "eventType": "REQUEST_CREATED",
+        "userId": "anonymous",
+        "userName": "Tim die alte Sau",
+        "hostname": "AASC-TEST",
+        "requestId": "69b541df-b76c-4871-8e26-80b9a10f54f9",
+        "details": "{\"action\":\"Password request created\",\"justificationHash\":\"4610615a959e2667\"}",
+        "clientIp": "::1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": true,
+        "errorMessage": null,
+        "id": "e4b7c111-b2e8-4367-81fa-208d4eaa840a",
+        "timestamp": "2026-01-15T19:32:51.236Z"
+      }
+    ],
+    [
+      "50dee88b-9039-4188-b489-fe067a7beae0",
+      {
+        "eventType": "LOGIN_SUCCESS",
+        "userId": "admin",
+        "userName": "Admin User",
+        "hostname": null,
+        "requestId": null,
+        "details": "{\"action\":\"User logged in successfully\"}",
+        "clientIp": "127.0.0.1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": true,
+        "errorMessage": null,
+        "id": "50dee88b-9039-4188-b489-fe067a7beae0",
+        "timestamp": "2026-01-15T19:32:56.002Z"
+      }
+    ],
+    [
+      "aad3c46f-40d4-4dc8-ad03-38881e9f8435",
+      {
+        "eventType": "REQUEST_DENIED",
+        "userId": "admin",
+        "userName": "Admin User",
+        "hostname": "AASC-TEST",
+        "requestId": "69b541df-b76c-4871-8e26-80b9a10f54f9",
+        "details": "{\"action\":\"Password request denied\",\"requesterName\":\"Tim die alte Sau\",\"comment\":\"No comment\"}",
+        "clientIp": "127.0.0.1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": true,
+        "errorMessage": null,
+        "id": "aad3c46f-40d4-4dc8-ad03-38881e9f8435",
+        "timestamp": "2026-01-15T19:36:15.208Z"
+      }
+    ],
+    [
+      "fbb056bb-be38-463e-a4ad-eba0f29058f7",
+      {
+        "eventType": "LOGIN_SUCCESS",
+        "userId": "admin",
+        "userName": "Admin User",
+        "hostname": null,
+        "requestId": null,
+        "details": "{\"action\":\"User logged in successfully\"}",
+        "clientIp": "127.0.0.1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": true,
+        "errorMessage": null,
+        "id": "fbb056bb-be38-463e-a4ad-eba0f29058f7",
+        "timestamp": "2026-01-15T19:36:57.307Z"
+      }
+    ],
+    [
+      "4d7bbea9-32fe-4cdf-8401-1e791a28ea44",
+      {
+        "eventType": "LOGIN_SUCCESS",
+        "userId": "admin",
+        "userName": "Admin User",
+        "hostname": null,
+        "requestId": null,
+        "details": "{\"action\":\"User logged in successfully\"}",
+        "clientIp": "127.0.0.1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": true,
+        "errorMessage": null,
+        "id": "4d7bbea9-32fe-4cdf-8401-1e791a28ea44",
+        "timestamp": "2026-01-15T19:45:07.063Z"
+      }
+    ],
+    [
+      "6b868bc5-a2cf-44d3-9e89-79094cc8d26c",
+      {
+        "eventType": "LOGIN_SUCCESS",
+        "userId": "admin",
+        "userName": "Admin User",
+        "hostname": null,
+        "requestId": null,
+        "details": "{\"action\":\"User logged in successfully\"}",
+        "clientIp": "127.0.0.1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": true,
+        "errorMessage": null,
+        "id": "6b868bc5-a2cf-44d3-9e89-79094cc8d26c",
+        "timestamp": "2026-01-15T20:10:46.560Z"
+      }
+    ],
+    [
+      "6adf36ed-96fd-4d73-a597-3723af6bc41d",
+      {
+        "eventType": "REQUEST_DENIED",
+        "userId": "admin",
+        "userName": "Admin User",
+        "hostname": "PMCS-AASC",
+        "requestId": "db9a5d2d-4305-42b2-be85-b9705b47a3b3",
+        "details": "{\"action\":\"Password request denied\",\"requesterName\":\"Aaron Schunter\",\"comment\":\"No comment\"}",
+        "clientIp": "127.0.0.1",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "success": true,
+        "errorMessage": null,
+        "id": "6adf36ed-96fd-4d73-a597-3723af6bc41d",
+        "timestamp": "2026-01-15T20:14:57.898Z"
+      }
+    ]
+  ],
+  "encryptedPasswords": []
+}
