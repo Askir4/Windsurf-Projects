@@ -238,6 +238,7 @@ class FertilizerControlSystem {
         // Modus-Wechsel
         document.getElementById('viewMode').addEventListener('click', () => this.setMode('view'));
         document.getElementById('editMode').addEventListener('click', () => this.setMode('edit'));
+        document.getElementById('profileMode')?.addEventListener('click', () => this.setMode('profile'));
         
         // Pflanzenformular
         document.getElementById('plantForm').addEventListener('submit', (e) => {
@@ -439,12 +440,35 @@ class FertilizerControlSystem {
         // UI aktualisieren
         document.getElementById('viewMode').classList.toggle('active', mode === 'view');
         document.getElementById('editMode').classList.toggle('active', mode === 'edit');
-        document.getElementById('mapEditor').classList.toggle('hidden', mode === 'view');
+        document.getElementById('adminMode')?.classList.toggle('active', mode === 'admin');
+        document.getElementById('profileMode')?.classList.toggle('active', mode === 'profile');
+        
+        // Panels anzeigen/verstecken
+        document.getElementById('plantManagement')?.classList.toggle('hidden', mode !== 'view');
+        document.getElementById('mapEditor')?.classList.toggle('hidden', mode !== 'edit');
+        document.getElementById('adminPanel')?.classList.toggle('hidden', mode !== 'admin');
+        document.getElementById('profilePanel')?.classList.toggle('hidden', mode !== 'profile');
+        
+        // Map und rechte Sidebar nur in view/edit zeigen
+        const mapContainer = document.querySelector('.map-container');
+        const rightSidebar = document.querySelector('.right-sidebar');
+        const bedDetails = document.getElementById('bedDetailsSection');
+        const sensorDashboard = document.querySelector('.sensor-dashboard-fullwidth');
+        
+        const showMap = (mode === 'view' || mode === 'edit');
+        mapContainer?.classList.toggle('hidden', !showMap);
+        rightSidebar?.classList.toggle('hidden', !showMap);
+        bedDetails?.classList.toggle('hidden', !showMap);
+        sensorDashboard?.classList.toggle('hidden', mode === 'profile');
         
         // Editor-UI aktualisieren
         if (mode === 'edit') {
             this.updateEditorUI();
-            this.refreshLogsView();
+        }
+        
+        // Profil-Daten laden
+        if (mode === 'profile' && typeof authManager !== 'undefined') {
+            authManager.loadProfileData();
         }
         
         this.render();
@@ -2821,44 +2845,43 @@ class FertilizerControlSystem {
         if (!container) return;
 
         if (!logs || logs.length === 0) {
-            container.innerHTML = '<div class="log-empty">Keine Logs vorhanden</div>';
+            container.innerHTML = typeof LogUtils !== 'undefined' 
+                ? LogUtils.renderEmptyState('Keine System-Logs vorhanden')
+                : '<div class="log-empty-state"><i class="fas fa-inbox"></i><p>Keine Logs vorhanden</p></div>';
             return;
         }
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'logs-list';
+        // Header + Logs Container
+        let html = `
+            <div class="log-list-header">
+                <span>Zeitpunkt</span>
+                <span>Level</span>
+                <span>Nachricht</span>
+                <span></span>
+            </div>
+            <div class="logs-container">
+        `;
 
-        logs.slice(0, 200).forEach(log => {
-            const item = document.createElement('div');
-            item.className = `log-item log-${(log.level || 'INFO').toLowerCase()}`;
-
-            const time = document.createElement('div');
-            time.className = 'log-time';
-            time.textContent = log.timestamp ? new Date(log.timestamp).toLocaleString('de-DE') : '';
-
-            const level = document.createElement('div');
-            level.className = 'log-level';
-            level.textContent = log.level || '';
-
-            const msg = document.createElement('div');
-            msg.className = 'log-message';
-            msg.textContent = log.message || '';
-
-            item.appendChild(time);
-            item.appendChild(level);
-            item.appendChild(msg);
-
-            if (log.data) {
-                const data = document.createElement('pre');
-                data.className = 'log-data';
-                data.textContent = JSON.stringify(log.data, null, 2);
-                item.appendChild(data);
+        logs.slice(0, 200).forEach((log, index) => {
+            if (typeof LogUtils !== 'undefined') {
+                html += LogUtils.renderSystemLogItem(log, index);
+            } else {
+                // Fallback ohne LogUtils
+                const level = (log.level || 'INFO').toUpperCase();
+                html += `
+                    <div class="log-row log-row-${level.toLowerCase()} ${index % 2 === 0 ? 'log-row-even' : ''}">
+                        <div class="log-row-main">
+                            <div class="log-col">${new Date(log.timestamp).toLocaleString('de-DE')}</div>
+                            <div class="log-col"><span class="log-level-badge log-level-${level.toLowerCase()}">${level}</span></div>
+                            <div class="log-col">${this.escapeHtml(log.message || '')}</div>
+                        </div>
+                    </div>
+                `;
             }
-
-            wrapper.appendChild(item);
         });
 
-        container.appendChild(wrapper);
+        html += '</div>';
+        container.innerHTML = html;
     }
     
     reconnectNodeRed() {

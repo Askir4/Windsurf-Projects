@@ -1,27 +1,35 @@
 {
   "name": "fertilizer-control-system",
-  "version": "1.0.0",
-  "description": "Steuerbare Düngeanlage mit Server-Datenbankanbindung",
+  "version": "2.0.0",
+  "description": "Steuerbare Düngeanlage mit Server-Datenbankanbindung und Benutzerverwaltung",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
     "init-db": "node -e \"require('./server.js')\"",
-    "test": "echo \"No tests specified\" && exit 1"
+    "test": "node --test tests/"
   },
   "dependencies": {
     "express": "^4.18.2",
     "sqlite3": "^5.1.6",
     "cors": "^2.8.5",
+    "bcryptjs": "^2.4.3",
+    "express-session": "^1.17.3",
+    "connect-sqlite3": "^0.9.13",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
     "nodemon": "^3.0.2"
   },
-  "devDependencies": {},
   "keywords": [
     "agriculture",
     "fertilizer",
     "control-system",
     "database",
-    "api"
+    "api",
+    "authentication",
+    "rbac"
   ],
   "author": "Lernfeld 7 Projektteam",
   "license": "MIT",

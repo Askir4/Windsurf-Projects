@@ -15,6 +15,15 @@
                 <p>Lernfeld 7 - Präzisionsdüngung mit Einzelsteuerung</p>
             </div>
             <div class="header-right">
+                <!-- Einfache User-Info (nur sichtbar wenn eingeloggt) -->
+                <div class="user-info-simple hidden" id="userMenu">
+                    <img src="/assets/default-avatar.svg" alt="Avatar" class="user-avatar-small" id="headerAvatar">
+                    <span class="user-name-simple" id="headerUsername">User</span>
+                    <button class="btn-logout" id="menuLogout" title="Abmelden">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+                
                 <label class="dark-mode-switch" id="darkModeToggle">
                     <input type="checkbox" id="darkModeCheckbox">
                     <span class="slider">
@@ -25,6 +34,197 @@
             </div>
         </div>
     </header>
+    
+    <!-- Login Modal -->
+    <div class="modal-overlay hidden" id="loginModal">
+        <div class="modal login-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-sign-in-alt"></i> Anmelden</h2>
+            </div>
+            <form id="loginForm" class="modal-body">
+                <div class="form-group">
+                    <label for="loginUsername">Benutzername</label>
+                    <input type="text" id="loginUsername" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Passwort</label>
+                    <input type="password" id="loginPassword" required autocomplete="current-password">
+                </div>
+                <div class="form-error hidden" id="loginError"></div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i> Anmelden
+                </button>
+            </form>
+            <div class="modal-footer">
+                <p class="used-by-text">Verwendet von</p>
+                <img src="/assets/fds-logo.svg" alt="Friedrich Dessauer Schule" class="partner-logo" id="partnerLogo">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Profil Modal -->
+    <div class="modal-overlay hidden" id="profileModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-edit"></i> Profil bearbeiten</h2>
+                <button class="modal-close" data-close="profileModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="avatar-upload-section">
+                    <img src="/assets/default-avatar.svg" alt="Avatar" class="profile-avatar-preview" id="profileAvatarPreview">
+                    <label class="btn btn-secondary avatar-upload-btn">
+                        <i class="fas fa-camera"></i> Avatar ändern
+                        <input type="file" id="avatarUpload" accept=".png,.jpg,.jpeg,.webp" hidden>
+                    </label>
+                </div>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label>Benutzername</label>
+                        <input type="text" id="profileUsername" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileEmail">E-Mail</label>
+                        <input type="email" id="profileEmail">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" data-close="profileModal">Abbrechen</button>
+                <button class="btn btn-primary" id="saveProfile">Speichern</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Passwort ändern Modal -->
+    <div class="modal-overlay hidden" id="passwordModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-key"></i> Passwort ändern</h2>
+                <button class="modal-close" data-close="passwordModal">&times;</button>
+            </div>
+            <form id="passwordForm" class="modal-body">
+                <div class="form-group">
+                    <label for="currentPassword">Aktuelles Passwort</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Neues Passwort (mind. 8 Zeichen)</label>
+                    <input type="password" id="newPassword" required minlength="8">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Passwort bestätigen</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <div class="form-error hidden" id="passwordError"></div>
+            </form>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" data-close="passwordModal">Abbrechen</button>
+                <button class="btn btn-primary" id="savePassword">Passwort ändern</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Admin: Benutzerverwaltung Modal -->
+    <div class="modal-overlay hidden" id="usersModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h2><i class="fas fa-users-cog"></i> Benutzerverwaltung</h2>
+                <button class="modal-close" data-close="usersModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-toolbar">
+                    <button class="btn btn-success" id="addUserBtn">
+                        <i class="fas fa-user-plus"></i> Neuer Benutzer
+                    </button>
+                </div>
+                <div class="users-table-container">
+                    <table class="data-table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>Avatar</th>
+                                <th>Benutzername</th>
+                                <th>E-Mail</th>
+                                <th>Rolle</th>
+                                <th>Erstellt</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Admin: Audit-Logs Modal -->
+    <div class="modal-overlay hidden" id="auditLogsModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h2><i class="fas fa-clipboard-list"></i> Audit-Logs</h2>
+                <button class="modal-close" data-close="auditLogsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="audit-filters">
+                    <select id="auditActionFilter">
+                        <option value="">Alle Aktionen</option>
+                        <option value="LOGIN_SUCCESS">Login</option>
+                        <option value="LOGOUT">Logout</option>
+                        <option value="USER_CREATED">User erstellt</option>
+                        <option value="USER_UPDATED">User aktualisiert</option>
+                        <option value="USER_DELETED">User gelöscht</option>
+                        <option value="PASSWORD_CHANGED">Passwort geändert</option>
+                        <option value="NOTE_CREATED">Notiz erstellt</option>
+                        <option value="PLANT_ADDED">Pflanze hinzugefügt</option>
+                        <option value="FERTILIZER_APPLIED">Dünger angewandt</option>
+                    </select>
+                    <input type="text" id="auditActorFilter" placeholder="Benutzer suchen...">
+                    <button class="btn btn-primary" id="applyAuditFilter">
+                        <i class="fas fa-filter"></i> Filtern
+                    </button>
+                </div>
+                <div class="audit-logs-container" id="auditLogsTableBody">
+                    <!-- Logs werden dynamisch gerendert -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User erstellen/bearbeiten Modal -->
+    <div class="modal-overlay hidden" id="userEditModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="userEditTitle"><i class="fas fa-user-plus"></i> Neuer Benutzer</h2>
+                <button class="modal-close" data-close="userEditModal">&times;</button>
+            </div>
+            <form id="userEditForm" class="modal-body">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label for="editUsername">Benutzername</label>
+                    <input type="text" id="editUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">E-Mail (optional)</label>
+                    <input type="email" id="editEmail">
+                </div>
+                <div class="form-group" id="editPasswordGroup">
+                    <label for="editPassword">Passwort (mind. 8 Zeichen)</label>
+                    <input type="password" id="editPassword" minlength="8">
+                </div>
+                <div class="form-group">
+                    <label for="editRole">Rolle</label>
+                    <select id="editRole">
+                        <option value="NORMAL_USER">Benutzer</option>
+                        <option value="ADMIN">Administrator</option>
+                    </select>
+                </div>
+                <div class="form-error hidden" id="userEditError"></div>
+            </form>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" data-close="userEditModal">Abbrechen</button>
+                <button class="btn btn-primary" id="saveUserBtn">Speichern</button>
+            </div>
+        </div>
+    </div>
 
     <main>
         <div class="container">
@@ -37,6 +237,12 @@
                         </button>
                         <button id="editMode" class="btn btn-secondary mode-btn">
                             <i class="fas fa-edit"></i> Editor
+                        </button>
+                        <button id="adminMode" class="btn btn-secondary mode-btn admin-only hidden">
+                            <i class="fas fa-shield-alt"></i> Admin
+                        </button>
+                        <button id="profileMode" class="btn btn-secondary mode-btn">
+                            <i class="fas fa-user-circle"></i> Profil
                         </button>
                     </div>
                 </section>
@@ -151,6 +357,25 @@
                         </div>
                     </details>
                     
+                </section>
+                
+                <!-- Admin Panel (nur für Admins sichtbar) -->
+                <section class="admin-panel hidden" id="adminPanel">
+                    <h2><i class="fas fa-cog"></i> Administration</h2>
+                    
+                    <details class="accordion-card" open>
+                        <summary class="accordion-summary"><i class="fas fa-users-cog"></i> Benutzerverwaltung</summary>
+                        <div class="accordion-body">
+                            <p class="admin-info">Verwalte Benutzer und deren Berechtigungen.</p>
+                            <button id="openUsersModal" class="btn btn-primary btn-block">
+                                <i class="fas fa-users"></i> Benutzer verwalten
+                            </button>
+                            <button id="openAuditModal" class="btn btn-secondary btn-block" style="margin-top: 8px;">
+                                <i class="fas fa-clipboard-list"></i> Audit-Logs anzeigen
+                            </button>
+                        </div>
+                    </details>
+                    
                     <details class="accordion-card">
                         <summary class="accordion-summary"><i class="fas fa-network-wired"></i> NodeRED-Verbindung</summary>
                         <div class="accordion-body">
@@ -173,25 +398,65 @@
                         </div>
                     </details>
 
-                    <details class="accordion-card" id="logsViewer">
-                        <summary class="accordion-summary"><i class="fas fa-clipboard-list"></i> Logs</summary>
+                    <details class="accordion-card">
+                        <summary class="accordion-summary"><i class="fas fa-database"></i> Daten-Management</summary>
                         <div class="accordion-body">
-                            <div class="control-group">
-                                <label for="logLevelFilter">Level:</label>
-                                <select id="logLevelFilter">
-                                    <option value="">Alle</option>
-                                    <option value="ERROR">ERROR</option>
-                                    <option value="WARN">WARN</option>
-                                    <option value="INFO">INFO</option>
-                                    <option value="DEBUG">DEBUG</option>
-                                </select>
+                            <button id="clearAllData" class="btn btn-danger btn-block">
+                                <i class="fas fa-trash"></i> Alle Daten löschen
+                            </button>
+                            <p class="warning-text"><i class="fas fa-exclamation-triangle"></i> Achtung: Diese Aktion kann nicht rückgängig gemacht werden!</p>
+                        </div>
+                    </details>
+                </section>
+                
+                <!-- Profil Panel -->
+                <section class="profile-panel hidden" id="profilePanel">
+                    <h2><i class="fas fa-user-circle"></i> Mein Profil</h2>
+                    
+                    <div class="profile-card">
+                        <div class="profile-avatar-section">
+                            <img src="/assets/default-avatar.svg" alt="Avatar" class="profile-avatar-large" id="profileAvatar">
+                            <label class="btn btn-secondary btn-sm avatar-upload-btn">
+                                <i class="fas fa-camera"></i> Foto ändern
+                                <input type="file" id="avatarUpload" accept="image/*" hidden>
+                            </label>
+                        </div>
+                        <div class="profile-info">
+                            <div class="profile-field">
+                                <label>Benutzername</label>
+                                <span id="profileUsername">-</span>
                             </div>
-                            <div class="editor-tools">
-                                <button id="refreshLogs" class="btn btn-secondary">
-                                    <i class="fas fa-sync"></i> Aktualisieren
+                            <div class="profile-field">
+                                <label>Rolle</label>
+                                <span id="profileRole" class="role-badge">-</span>
+                            </div>
+                            <div class="profile-field">
+                                <label>Registriert</label>
+                                <span id="profileCreated">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <details class="accordion-card" open>
+                        <summary class="accordion-summary"><i class="fas fa-key"></i> Passwort ändern</summary>
+                        <div class="accordion-body">
+                            <form id="changePasswordForm">
+                                <div class="form-group">
+                                    <label for="currentPassword">Aktuelles Passwort</label>
+                                    <input type="password" id="currentPassword" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword">Neues Passwort</label>
+                                    <input type="password" id="newPassword" required minlength="8">
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmPassword">Passwort bestätigen</label>
+                                    <input type="password" id="confirmPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-save"></i> Passwort speichern
                                 </button>
-                            </div>
-                            <div id="logsContainer"></div>
+                            </form>
                         </div>
                     </details>
                 </section>
@@ -710,10 +975,102 @@
                 </div>
             </div>
         </section>
+        
+        <!-- Permanentes Log-Panel (nur für Admins) -->
+        <section class="logs-panel-fullwidth admin-only hidden" id="logsPanel">
+            <div class="logs-panel-header">
+                <div class="logs-panel-title">
+                    <i class="fas fa-stream"></i>
+                    <h2>Live-Protokoll</h2>
+                </div>
+                
+                <div class="logs-panel-controls">
+                    <!-- Log Type Toggle -->
+                    <div class="log-type-toggle">
+                        <button class="log-type-btn active" data-type="system" id="showSystemLogs">
+                            <i class="fas fa-server"></i> System
+                        </button>
+                        <button class="log-type-btn" data-type="audit" id="showAuditLogs">
+                            <i class="fas fa-user-clock"></i> Benutzer
+                        </button>
+                    </div>
+                    
+                    <!-- Search -->
+                    <div class="log-search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="logSearchInput" placeholder="Logs durchsuchen...">
+                    </div>
+                    
+                    <!-- Filter -->
+                    <select id="logLevelFilterPanel" class="log-filter-select">
+                        <option value="">Alle Level</option>
+                        <option value="ERROR">Error</option>
+                        <option value="WARN">Warning</option>
+                        <option value="INFO">Info</option>
+                        <option value="DEBUG">Debug</option>
+                    </select>
+                    
+                    <!-- Audit Filter (nur bei Audit-Logs sichtbar) -->
+                    <select id="logActionFilterPanel" class="log-filter-select hidden">
+                        <option value="">Alle Aktionen</option>
+                        <option value="LOGIN_SUCCESS">Login</option>
+                        <option value="LOGOUT">Logout</option>
+                        <option value="USER_CREATED">User erstellt</option>
+                        <option value="PASSWORD_CHANGED">Passwort geändert</option>
+                        <option value="PLANT_ADDED">Pflanze hinzugefügt</option>
+                        <option value="FERTILIZER_APPLIED">Gedüngt</option>
+                    </select>
+                    
+                    <!-- Export -->
+                    <div class="log-export-dropdown">
+                        <button class="btn btn-secondary log-export-btn" id="exportLogsBtn">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <div class="export-dropdown-menu hidden" id="exportDropdownMenu">
+                            <button class="export-option" data-format="json">
+                                <i class="fas fa-code"></i> JSON
+                            </button>
+                            <button class="export-option" data-format="csv">
+                                <i class="fas fa-file-csv"></i> CSV
+                            </button>
+                            <button class="export-option" data-format="txt">
+                                <i class="fas fa-file-alt"></i> Text
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Refresh -->
+                    <button class="btn btn-icon log-refresh-btn" id="refreshLogsBtn" title="Aktualisieren">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="logs-panel-body" id="logsPanelBody">
+                <!-- Logs werden hier dynamisch gerendert -->
+                <div class="log-loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Lade Logs...</p>
+                </div>
+            </div>
+            
+            <div class="logs-panel-footer">
+                <span class="log-count" id="logCount">0 Einträge</span>
+                <span class="log-last-update" id="logLastUpdate">Zuletzt aktualisiert: --</span>
+            </div>
+        </section>
     </main>
 
     <footer>
-        <p>&copy; 2026 Lernfeld 7 - Steuerbare Düngeanlage | Präzisionslandwirtschaft</p>
+        <div class="footer-content">
+            <div class="footer-left">
+                <p>&copy; 2026 Lernfeld 7 - Steuerbare Düngeanlage | Präzisionslandwirtschaft</p>
+            </div>
+            <div class="footer-partner">
+                <span class="partner-label">Ein Projekt der</span>
+                <img src="/assets/fds-logo.svg" alt="Friedrich Dessauer Schule" class="footer-logo">
+            </div>
+        </div>
     </footer>
 
     <!-- Plant Picker Modal -->
@@ -734,6 +1091,16 @@
         </div>
     </div>
 
+    <script src="log-utils.js"></script>
+    <script src="auth.js"></script>
     <script src="script.js"></script>
+    <script>
+        // Initialize Auth Manager after DOM and System are ready
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof system !== 'undefined') {
+                authManager = new AuthManager(system);
+            }
+        });
+    </script>
 </body>
 </html>
